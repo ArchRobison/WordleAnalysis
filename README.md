@@ -32,6 +32,16 @@ julia> benchmark()
 8 slate 3.474730
 179.804372 seconds (18.86 M allocations: 6.498 GiB, 0.34% gc time)
 9 slate 3.474298
+234.107886 seconds (24.37 M allocations: 8.419 GiB, 0.34% gc time)
+10 slate 3.474298
+268.222825 seconds (31.58 M allocations: 10.943 GiB, 0.38% gc time)
+11 slate 3.473866
+352.456360 seconds (39.65 M allocations: 13.777 GiB, 0.38% gc time)
+12 slate 3.473866
+436.780647 seconds (49.65 M allocations: 17.296 GiB, 0.39% gc time)
+13 slate 3.472570
+570.179705 seconds (59.91 M allocations: 20.908 GiB, 0.39% gc time)
+14 slate 3.472138
 ```
 The non-timing lines list the search width, first guess, and average number of guesses across all answers,
 including the first guess. It would appear that `slate` is the best first guess.
