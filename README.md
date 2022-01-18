@@ -1,6 +1,83 @@
 # WordleAnalysis
 
-Analyze Wordle strategies.
+Estimate optimal strategy for Wordle.
+
+The approach is semi-exhuastive search: use a heuristic to carve out promising
+arts of the search space and then search it exhaustively.
+
+## Formulation
+
+The problem can be formulated as building a tree where each node is a guess,
+and each edge is a response from the game. The children of a node represent the
+next guess to make according to the response on edge from the parent.
+
+The goal is to minimize the average path length (number of nodes, i.e. turns) for
+all paths from the root to nodes that have answers. The set of allowed guess words
+has 12972 words; the set of answer words is only 2315 words.
+
+## Partitioning
+
+Each guess partitions the possible answers into buckets, where each bucket holds
+the answers consistent with a response. E.g., for a top-level guess "slate", the
+partition has 147 buckets, including seven buckets listed below, prefixed
+by the response code (`b`=black, `y`=yellow, `g`=green).
+```
+...
+gggyb slant
+ggggg slate
+gggbg slave
+ggbby sleek sleep
+ggbyy sleet slept
+ggbbg slice slide slime slope
+ggbbb slick slimy sling slink sloop slosh slump slung slunk slurp slush slyly
+...
+```
+In the code, type `Partition` represents a partition, and has nice colored pretty printing.
+The example above is an excerpt from running:
+```
+julia> partition(answerWords,"slate")
+```
+
+## Heuristic 
+
+The heuristic is: given a bucket with n words in it, lg(n) bits of additional
+information are required to pick out the answer. Thus to estimate how good a guess is,
+use it to partition the possible answers, and then compute the average number of
+additional bits needed to distinguish the items. The average is across the buckets 
+and weighted by the size of the buckets.
+
+For example, running:
+```
+julia> entropy(partition(answerWords,"roate"))
+5.2940171538556315
+```
+tells us that we'll need about 5.29 bits of additional information.
+
+## Detailed Search
+
+Of course the lg(n) is an estimate for some idealized language where letter probabilities
+are random and independent. Particularly for small n, "chunkiness" effects take over.
+For small n, it's thus more accurate to actually compute the average path-length in a subtree.
+So use the lg(n) as an estimate to guide combinatorial search.
+
+Build the tree top-down. The code does not record the tree, but only the top-level word
+and average path length. Starting with all the possible answers, apply the heuristic to
+select the W most promising guesses, where W is a "width" parameter to the search. 
+Use each of these to generate a partition, and recursively find good guesses for each bucket,
+using the same approach of trying the W most promising guesses.
+
+## Optimization Notes
+
+Responses for all possible pairs(answer x guess) are computed ahead of time, and stored in
+`responseMatrix`. Each response fits in a byte, via base-3 encoding.  The encoding is offset
+by one, i.e. is in 1:3^5, so it can be used as a dense index into a `Vector`.
+
+Efficient partitioning is important. Words in `Partition` are represented by their indices
+in the constant vector `answerWords`.  This enables fundamental operations on `Partition`
+to be fast. Adding a word to a `Partition` takes amortized O(1) time.
+
+For sake of exploration, many of the index-based routines have friendly wrapper overloads
+that take strings.
 
 # Files
 
@@ -10,9 +87,14 @@ Analyze Wordle strategies.
 
 * core.jl - core data structures and tables
 
-* analysis.jl - routines for analysis. Try running `benchmark()` to see estimates of best first word with successively
-  wider search windows.
+* analysis.jl - routines for analysis. 
+
+Run `benchmark()` to see estimates of best first word with successively wider search windows.
+Sample output shown below. The non-timing lines list the search width parameter W, best first guess found,
+and average number of guesses across all answers, including the first guess. 
 ```
+julia> include("analysis.jl")
+
 julia> benchmark()
   3.843582 seconds (239.37 k allocations: 77.807 MiB, 0.23% gc time)
 1 soare 3.532613
@@ -55,5 +137,4 @@ julia> benchmark()
 1237.442731 seconds (165.57 M allocations: 58.331 GiB, 0.40% gc time)
 20 slate 3.469114
 ```
-The non-timing lines list the search width, first guess, and average number of guesses across all answers,
-including the first guess. It would appear that `slate` is the best first guess.
+It would appear that `slate` is likely the best first guess possible.

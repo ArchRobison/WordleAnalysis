@@ -75,17 +75,17 @@ GGYYB
 ```
 """
 struct Response
-    rep :: UInt8 # Encoded in ternary
+    rep :: UInt8 # Encoded in ternary, with 1 added so it can be used as a one-based index.
 
     function Response(ternaryEncoding::Integer) 
-        @assert ternaryEncoding ≥ 0
-        @assert ternaryEncoding < 3^5
+        @assert ternaryEncoding ≥ 1
+        @assert ternaryEncoding ≤ 3^5
         return new(ternaryEncoding)
     end
 
     function Response(colors::String) 
         @assert length(colors) == 5
-        sum = 0
+        sum = 1
         placeValue = 1
         for c in colors
             sum += Int(colorOfLetter[lowercase(c)]) * placeValue
@@ -97,7 +97,7 @@ struct Response
     function Response(answer::String, guess::String)
         @assert length(answer) == 5
         @assert length(guess) == 5
-        sum = 0
+        sum = 1
         placeValue = 1
         for i in 1:5
             if guess[i] == answer[i]
@@ -115,7 +115,7 @@ end
     Print response using colored letters.
 """
 function show(io::IO, response::Response)
-    value = response.rep
+    value = response.rep - 1
     style = [:light_black, :light_yellow, :light_green]
     for position in 1:5
         k = value % 3
@@ -143,7 +143,7 @@ struct Partition
     nonEmptyBuckets::Vector{Int16}
 
     function Partition()
-        emptyBuckets = [Int16[] for i in 0:3^5-1]
+        emptyBuckets = [Int16[] for i in 1:3^5]
         return new(fill(nothing, 3^5), Int16[])
     end
 end
@@ -158,7 +158,7 @@ function show(io::IO, p::Partition)
     for i in p.nonEmptyBuckets
         print(io, rowDelim)
         rowDelim = "\n"
-        print(io, Response(i-1))
+        print(io, Response(i))
         for j in p.buckets[i]
             print(io, " ", answerWords[j])
         end
@@ -179,13 +179,13 @@ end
     Add answer to partition
 """
 function pushAt!(p::Partition, r::Response, a::AnswerIndex)
-    b = p.buckets[r.rep + 1]
+    b = p.buckets[r.rep]
     if b == nothing
         b = AnswerIndex[]
-        p.buckets[r.rep + 1] = b
+        p.buckets[r.rep] = b
     end
     if isempty(b)
-        push!(p.nonEmptyBuckets, r.rep + 1)
+        push!(p.nonEmptyBuckets, r.rep)
     end
     push!(b, a)
     return p
