@@ -89,7 +89,7 @@ struct Response
         return new(ternaryEncoding)
     end
 
-    function Response(colors::String) 
+    function Response(colors::AbstractString) 
         @assert length(colors) == 5
         sum = 1
         placeValue = 1

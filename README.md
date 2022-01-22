@@ -89,6 +89,8 @@ that take strings.
 
 * analysis.jl - routines for analysis. 
 
+* parasite.jl - routines for exploiting knowledge from posted results
+
 Run `benchmark()` to see estimates of best first word with successively wider search windows.
 Sample output shown below. The non-timing lines list the search width parameter W, best first guess found,
 and average number of guesses across all answers, including the first guess. 
