@@ -2,7 +2,7 @@
 
 # const names that require reading files or expensive computations are not recomputed.
 
-import Base: empty!, length, show
+import Base: empty!, getindex, length, show
 
 """
     Return vector of strings from a file. 
@@ -36,6 +36,12 @@ const GuessIndex = UInt16
 
 """
      Get index of word in list
+
+Example:
+```
+julia> indexOfWord("abate",answerWords)
+0x0003
+```
 """
 function indexOfWord(word::String, list::Vector{String})
     i = searchsortedfirst(list, word)
@@ -134,14 +140,16 @@ end
 """
     Partition
 
-A partition of indices.
+Partition of answer indices. The interface behaves similarly to an assocative map from Response to Vector{AnswerIndex}.
 """
 struct Partition
+    # Indices of answers in the bucket, or nothing if bucket not yet needed.
     buckets::Vector{Union{Nothing,Vector{AnswerIndex}}}
 
     # Indices of non-empty buckets
     nonEmptyBuckets::Vector{Int16}
 
+    # Empty partition
     function Partition()
         emptyBuckets = [Int16[] for i in 1:3^5]
         return new(fill(nothing, 3^5), Int16[])
@@ -149,17 +157,41 @@ struct Partition
 end
 
 """
-    Number of non-empty buckets in partition
+    Support for iterating over non-empty buckets in a partition. Each iteration returns a (Response, Vector{AnswerIndex}). 
+"""
+function Base.iterate(p::Partition, state=1)
+    if length(p.nonEmptyBuckets) < state
+        return nothing
+    else
+        i = p.nonEmptyBuckets[state]
+        return ((Response(i), p.buckets[i]), state + 1)
+    end
+end
+
+"""
+    Number of non-empty buckets in a partition
 """
 length(p::Partition) = length(p.nonEmptyBuckets)
 
+"""
+    Get bucket for given response
+"""
+function getindex(p::Partition, r::Response)
+    b = p.buckets[r.rep]
+    if b == nothing
+        b = AnswerIndex[]
+        p.buckets[r.rep] = b
+    end
+    return b
+end
+
 function show(io::IO, p::Partition)
     rowDelim = ""
-    for i in p.nonEmptyBuckets
+    for (r, b) in p
         print(io, rowDelim)
         rowDelim = "\n"
-        print(io, Response(i))
-        for j in p.buckets[i]
+        print(io, r)
+        for j in b
             print(io, " ", answerWords[j])
         end
     end
@@ -179,11 +211,7 @@ end
     Add answer to partition
 """
 function pushAt!(p::Partition, r::Response, a::AnswerIndex)
-    b = p.buckets[r.rep]
-    if b == nothing
-        b = AnswerIndex[]
-        p.buckets[r.rep] = b
-    end
+    b = p[r]
     if isempty(b)
         push!(p.nonEmptyBuckets, r.rep)
     end
@@ -220,6 +248,32 @@ function partition(answers::Vector{String}, guess::String)
     p = Partition()
     partition!(p, indicesOfWords(answers, answerWords), indexOfWord(guess, guessWords))
     return p
+end
+
+"""
+    partition[response]
+
+Returns answers in partition for given response.
+This is a high-level method that takes the string form of a response and returns strings.
+```
+julia> partition(["aback", "abase", "abate", "abbey"], "abbot")["ggybb"]
+2-element Vector{String}:
+ "aback"
+ "abase"
+```
+"""
+getindex(p::Partition, response::String) = answerWords[p[Response(response)]]
+
+"""
+    winnow(answers, guess, response)
+
+Return subset of answers consistent with response to a guess.
+"""
+function winnow(answers::Vector{String}, guess::String, response::String)
+    r = Response(response)
+    g = indexOfWord(guess, guessWords)
+    a = indicesOfWords(answers, answerWords)
+    return answerWords[[ai for ai in a if responseMatrix[ai, g] == r]]
 end
 
 nothing
