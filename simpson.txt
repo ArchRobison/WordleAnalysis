@@ -1,0 +1,54 @@
+# Dataset from https://www.facebook.com/photo/?fbid=404652731450088
+
+# Top left
+bbyyy
+byygy
+
+# Top second from left
+bbbbg
+ybbyg
+bbyyg
+gbybg
+
+# Top third from left
+bbyyy
+byygy
+
+# Top fourth from left
+bybbb
+yybbb
+gbyyb
+gbygb
+
+# Top right
+bbbbg
+ybbyg
+bbyyg
+gbybg
+
+# Leftmost
+bbbby
+yybbb
+byyyy
+
+# Second row, second from left
+bybbb
+yybbb
+gbyyb
+gbygb
+
+# Above black dress
+ybbbb
+byybb
+bygby
+
+# Above red dress
+bbbbb
+yybbb
+gggbb
+gggbg
+
+# Left lowest
+ggbbg
+gggbg
+
