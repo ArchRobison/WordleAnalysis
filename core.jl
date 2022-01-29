@@ -1,7 +1,5 @@
 # Core data structures for analyzing Wordle
 
-# const names that require reading files or expensive computations are not recomputed.
-
 import Base: empty!, getindex, length, show
 
 """
@@ -10,24 +8,20 @@ import Base: empty!, getindex, length, show
 """
 readWords(filename::AbstractString) = String[lowercase(line) for line in eachline(filename)]
 
-if !isdefined(Main, :answerWords)
 """
-    Possible answer words
+    Words that Wordle uses as possible answers.
 """
 const answerWords = sort(readWords("answers.txt"))
-end
 
 """
      Index into answerWords
 """
 const AnswerIndex = UInt16
 
-if !isdefined(Main, :guessWords)
 """
-    Allowed guess words
+    Allowed guess words. These are the answerWords and additional words that Wordle allows as guesses.
 """
 const guessWords = sort([answerWords; readWords("guesses-other.txt")])
-end
 
 """
      Index into guessWords
@@ -130,12 +124,10 @@ function show(io::IO, response::Response)
     end
 end
 
-if !isdefined(Main, :responseMatrix)
 """
     Matrix of precomputed responses, indexed by [answerIndex, guessIndex].
 """
 const responseMatrix = [Response(answerWords[i], guessWords[j]) for i in 1:length(answerWords), j in 1:length(guessWords)]
-end
 
 """
     Partition

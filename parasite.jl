@@ -1,6 +1,8 @@
 # Functions for getting parasitic assist from using other people's results.
 
+if !isdefined(Main, :Response)
 include("core.jl")
+end
 
 """
     readResponses(filename)

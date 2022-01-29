@@ -83,7 +83,7 @@ that take strings.
 
 * `answers.txt` - answer words
 
-* `guesses-other.txt` - allowed guesses that are not in answers.txt.
+* `guesses-other.txt` - allowed guesses that are not in `answers.txt`.
   The allowed guesses are the union of this file and `answers.txt`.
 
 * `core.jl` - core data structures and tables

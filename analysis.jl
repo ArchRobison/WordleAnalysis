@@ -1,7 +1,9 @@
 import Base: empty!, getindex, show
 import Printf: @printf
 
+if !isdefined(Main, :Partition)
 include("core.jl")
+end
 
 """
     entropy(partition)
