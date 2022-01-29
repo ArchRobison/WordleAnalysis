@@ -13,9 +13,9 @@ Read responses from a file. Each line should be one of:
 function readResponses(filename::AbstractString)
     result = Response[]
     for line in eachline(filename)
-        m = match(r"^[byg][byg][byg][byg][byg] *$", line)
+        m = match(r"^[byg]{5}", line)
         if m ≠ nothing
-            push!(result, Response(line))
+            push!(result, Response(m.match))
             continue
         end
         m = match(r"^#.*$", line)
