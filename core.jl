@@ -150,10 +150,7 @@ struct Partition
     nonEmptyBuckets::Vector{Int16}
 
     # Empty partition
-    function Partition()
-        emptyBuckets = [Int16[] for i in 1:3^5]
-        return new(fill(nothing, 3^5), Int16[])
-    end
+    Partition() = new(fill(nothing, 3^5), Int16[])
 end
 
 """
