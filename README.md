@@ -38,12 +38,12 @@ The example above is an excerpt from running:
 julia> partition(answerWords,"slate")
 ```
 
-## Heuristic 
+## Heuristic
 
 The heuristic is: given a bucket with n words in it, lg(n) bits of additional
 information are required to pick out the answer. Thus to estimate how good a guess is,
 use it to partition the possible answers, and then compute the average number of
-additional bits needed to distinguish the items. The average is across the buckets 
+additional bits needed to distinguish the items. The average is across the buckets
 and weighted by the size of the buckets.
 
 For example, running:
@@ -62,7 +62,7 @@ So use the lg(n) as an estimate to guide combinatorial search.
 
 Build the tree top-down. The code does not record the tree, but only the top-level word
 and average path length. Starting with all the possible answers, apply the heuristic to
-select the W most promising guesses, where W is a "width" parameter to the search. 
+select the W most promising guesses, where W is a "width" parameter to the search.
 Use each of these to generate a partition, and recursively find good guesses for each bucket,
 using the same approach of trying the W most promising guesses.
 
@@ -81,19 +81,20 @@ that take strings.
 
 # Files
 
-* answers.txt - answer words
+* `answers.txt` - answer words
 
-* guesses-other.txt - allowed guesses that are not in answers.txt
+* `guesses-other.txt` - allowed guesses that are not in answers.txt.
+  The allowed guesses are the union of this file and `answers.txt`.
 
-* core.jl - core data structures and tables
+* `core.jl` - core data structures and tables
 
-* analysis.jl - routines for analysis. 
+* `analysis.jl` - routines for analysis.
 
-* parasite.jl - routines for exploiting knowledge from posted results
+* `parasite.jl` - routines for exploiting knowledge from posted results
 
 Run `benchmark()` to see estimates of best first word with successively wider search windows.
 Sample output shown below. The non-timing lines list the search width parameter W, best first guess found,
-and average number of guesses across all answers, including the first guess. 
+and average number of guesses across all answers, including the first guess.
 ```
 julia> include("analysis.jl")
 
