@@ -99,45 +99,31 @@ and average number of guesses across all answers, including the first guess.
 julia> include("analysis.jl")
 
 julia> benchmark()
-  3.843582 seconds (239.37 k allocations: 77.807 MiB, 0.23% gc time)
-1 soare 3.532613
- 10.000957 seconds (831.42 k allocations: 279.804 MiB, 0.33% gc time)
-2 soare 3.524406
- 19.578414 seconds (1.78 M allocations: 608.635 MiB, 0.31% gc time)
-3 soare 3.520086
- 33.192401 seconds (3.19 M allocations: 1.075 GiB, 0.32% gc time)
-4 raile 3.514903
- 52.062859 seconds (5.03 M allocations: 1.703 GiB, 0.33% gc time)
-5 reast 3.480346
- 76.379512 seconds (7.41 M allocations: 2.523 GiB, 0.33% gc time)
-6 slate 3.476026
- 99.450780 seconds (10.45 M allocations: 3.576 GiB, 0.33% gc time)
-7 slate 3.474730
-130.135821 seconds (14.07 M allocations: 4.829 GiB, 0.33% gc time)
-8 slate 3.474730
-179.804372 seconds (18.86 M allocations: 6.498 GiB, 0.34% gc time)
-9 slate 3.474298
-234.107886 seconds (24.37 M allocations: 8.419 GiB, 0.34% gc time)
-10 slate 3.474298
-268.222825 seconds (31.58 M allocations: 10.943 GiB, 0.38% gc time)
-11 slate 3.473866
-352.456360 seconds (39.65 M allocations: 13.777 GiB, 0.38% gc time)
-12 slate 3.473866
-436.780647 seconds (49.65 M allocations: 17.296 GiB, 0.39% gc time)
-13 slate 3.472570
-570.179705 seconds (59.91 M allocations: 20.908 GiB, 0.39% gc time)
-14 slate 3.472138
-650.177755 seconds (72.24 M allocations: 25.264 GiB, 0.37% gc time)
-15 slate 3.472138
-788.506429 seconds (85.58 M allocations: 29.971 GiB, 0.38% gc time)
-16 slate 3.471706
-898.101952 seconds (102.62 M allocations: 36.002 GiB, 0.40% gc time)
-17 slate 3.470842
-991.020468 seconds (120.20 M allocations: 42.228 GiB, 0.42% gc time)
-18 slate 3.469114
-1129.726298 seconds (140.88 M allocations: 49.574 GiB, 0.38% gc time)
-19 slate 3.469114
-1237.442731 seconds (165.57 M allocations: 58.331 GiB, 0.40% gc time)
-20 slate 3.469114
+  3.444578 seconds (153.36 k allocations: 70.833 MiB, 0.60% gc time, 0.63% compilation time)
+1 soare 3.527862
+ 11.395222 seconds (456.70 k allocations: 246.451 MiB, 0.90% gc time)
+2 roate 3.519654
+ 18.688045 seconds (971.81 k allocations: 536.884 MiB, 0.34% gc time)
+3 soare 3.515335
+ 32.628094 seconds (1.73 M allocations: 973.899 MiB, 0.35% gc time)
+4 raile 3.507559
+ 45.556954 seconds (2.72 M allocations: 1.506 GiB, 0.38% gc time)
+5 reast 3.473434
+ 65.069887 seconds (4.00 M allocations: 2.232 GiB, 0.31% gc time)
+6 slate 3.470410
+ 95.116648 seconds (5.62 M allocations: 3.163 GiB, 0.30% gc time)
+7 slate 3.469546
+124.790849 seconds (7.53 M allocations: 4.263 GiB, 0.30% gc time)
+8 slate 3.468683
+166.154597 seconds (10.07 M allocations: 5.741 GiB, 0.31% gc time)
+9 slate 3.468251
+208.248441 seconds (12.96 M allocations: 7.430 GiB, 0.31% gc time)
+10 slate 3.467387
+254.798649 seconds (16.70 M allocations: 9.624 GiB, 0.31% gc time)
+11 slate 3.467387
+334.379293 seconds (20.95 M allocations: 12.129 GiB, 0.24% gc time)
+12 slate 3.466955
+392.652938 seconds (26.02 M allocations: 15.138 GiB, 0.25% gc time)
+13 slate 3.466091
 ```
 It would appear that `slate` is likely the best first guess possible.

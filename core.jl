@@ -3,7 +3,7 @@
 import Base: empty!, getindex, length, show
 
 """
-    Return vector of strings from a file. 
+    Return vector of strings from a file.
     Canonicalize uppercase as lowercase.
 """
 readWords(filename::AbstractString) = String[lowercase(line) for line in eachline(filename)]
@@ -68,22 +68,22 @@ const colorOfLetter = Dict('b' => black, 'y' => yellow, 'g' => green)
 Examples:
 ```
 julia> Response("bbbyg")
-BBBYG
+bbbyg
 
 julia> Response("abbot","abate")
-GGYYB
+ggbyb
 ```
 """
 struct Response
     rep :: UInt8 # Encoded in ternary, with 1 added so it can be used as a one-based index.
 
-    function Response(ternaryEncoding::Integer) 
+    function Response(ternaryEncoding::Integer)
         @assert ternaryEncoding ≥ 1
         @assert ternaryEncoding ≤ 3^5
         return new(ternaryEncoding)
     end
 
-    function Response(colors::AbstractString) 
+    function Response(colors::AbstractString)
         @assert length(colors) == 5
         sum = 1
         placeValue = 1
@@ -97,16 +97,37 @@ struct Response
     function Response(answer::String, guess::String)
         @assert length(answer) == 5
         @assert length(guess) == 5
+
+        usedAnswerLetters = 0  # Bitset of answer letters used so far
+
+        greenGuessLetters = 0 # Bitset of guess letters classified as green
+        for i in 1:5
+            if guess[i] == answer[i]
+                greenGuessLetters |= 1 << i
+            end
+        end
+        usedAnswerLetters = greenGuessLetters
+
+        yellowGuessLetters = 0 # Bitset of guess letters classified as yellow
+        for i in 1:5
+            if iseven(greenGuessLetters >> i)
+                for j in 1:5
+                    if iseven(usedAnswerLetters >> j) && answer[j] == guess[i]
+                        yellowGuessLetters |= 1 << i
+                        usedAnswerLetters |= 1 << j
+                        break
+                    end
+                end
+            end
+        end
+
         sum = 1
         placeValue = 1
         for i in 1:5
-            if guess[i] == answer[i]
-                sum += Int(green) * placeValue
-            elseif guess[i] in answer
-                sum += Int(yellow) * placeValue
-            end
+            sum += ((greenGuessLetters >> i) & 1 * 2 + (yellowGuessLetters >> i) & 1) * placeValue
             placeValue *= 3
         end
+
         return new(sum)
     end
 end
@@ -123,6 +144,16 @@ function show(io::IO, response::Response)
         value = div(value, 3)
     end
 end
+
+"""
+    Test that Response constructors work.
+"""
+function testResponse()
+    @assert Response("abbot","abate") == Response("ggbyb")
+    @assert Response("wrung","nanny") == Response("bbbgb")
+end
+
+testResponse()
 
 """
     Matrix of precomputed responses, indexed by [answerIndex, guessIndex].
@@ -146,7 +177,7 @@ struct Partition
 end
 
 """
-    Support for iterating over non-empty buckets in a partition. Each iteration returns a (Response, Vector{AnswerIndex}). 
+    Support for iterating over non-empty buckets in a partition. Each iteration returns a (Response, Vector{AnswerIndex}).
 """
 function Base.iterate(p::Partition, state=1)
     if length(p.nonEmptyBuckets) < state
