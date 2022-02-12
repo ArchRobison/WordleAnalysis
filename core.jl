@@ -14,6 +14,13 @@ readWords(filename::AbstractString) = String[lowercase(line) for line in eachlin
 const answerWords = sort(readWords("answers.txt"))
 
 """
+    Number of characters per word.
+"""
+const charsPerWord = length(answerWords[1])
+
+@assert all(word->length(word) == charsPerWord, answerWords)
+
+"""
      Index into answerWords
 """
 const AnswerIndex = UInt16
@@ -22,6 +29,8 @@ const AnswerIndex = UInt16
     Allowed guess words. These are the answerWords and additional words that Wordle allows as guesses.
 """
 const guessWords = sort([answerWords; readWords("guesses-other.txt")])
+
+@assert all(word->length(word) == charsPerWord, guessWords)
 
 """
      Index into guessWords
@@ -61,6 +70,11 @@ indicesOfWords(words::Vector{String}, list::Vector{String}) = [indexOfWord(w, li
 const colorOfLetter = Dict('b' => black, 'y' => yellow, 'g' => green)
 
 """
+Unsigned integer type for encoding responses in ternary, with 1 added so it can be used as a one-based index.
+"""
+const ReponseEncoding = charsPerWord ≤ 5 ? UInt8 : charsPerWord ≤ 10 ? UInt16 : error("too many characters per word")
+
+"""
     Response to a guess.
 
     Can be constructed from string of letter codes or (answer, guess).
@@ -75,16 +89,16 @@ ggbyb
 ```
 """
 struct Response
-    rep :: UInt8 # Encoded in ternary, with 1 added so it can be used as a one-based index.
+    rep :: ReponseEncoding
 
     function Response(ternaryEncoding::Integer)
         @assert ternaryEncoding ≥ 1
-        @assert ternaryEncoding ≤ 3^5
+        @assert ternaryEncoding ≤ 3^charsPerWord
         return new(ternaryEncoding)
     end
 
     function Response(colors::AbstractString)
-        @assert length(colors) == 5
+        @assert length(colors) == charsPerWord
         sum = 1
         placeValue = 1
         for c in colors
@@ -95,13 +109,13 @@ struct Response
     end
 
     function Response(answer::String, guess::String)
-        @assert length(answer) == 5
-        @assert length(guess) == 5
+        @assert length(answer) == charsPerWord
+        @assert length(guess) == charsPerWord
 
         usedAnswerLetters = 0  # Bitset of answer letters used so far
 
         greenGuessLetters = 0 # Bitset of guess letters classified as green
-        for i in 1:5
+        for i in 1:charsPerWord
             if guess[i] == answer[i]
                 greenGuessLetters |= 1 << i
             end
@@ -109,9 +123,9 @@ struct Response
         usedAnswerLetters = greenGuessLetters
 
         yellowGuessLetters = 0 # Bitset of guess letters classified as yellow
-        for i in 1:5
+        for i in 1:charsPerWord
             if iseven(greenGuessLetters >> i)
-                for j in 1:5
+                for j in 1:charsPerWord
                     if iseven(usedAnswerLetters >> j) && answer[j] == guess[i]
                         yellowGuessLetters |= 1 << i
                         usedAnswerLetters |= 1 << j
@@ -123,7 +137,7 @@ struct Response
 
         sum = 1
         placeValue = 1
-        for i in 1:5
+        for i in 1:charsPerWord
             sum += ((greenGuessLetters >> i) & 1 * 2 + (yellowGuessLetters >> i) & 1) * placeValue
             placeValue *= 3
         end
@@ -138,7 +152,7 @@ end
 function show(io::IO, response::Response)
     value = response.rep - 1
     style = [:light_black, :light_yellow, :light_green]
-    for position in 1:5
+    for position in 1:charsPerWord
         k = value % 3
         printstyled(io, "byg"[k+1]; color=style[k+1])
         value = div(value, 3)
@@ -153,7 +167,9 @@ function testResponse()
     @assert Response("wrung","nanny") == Response("bbbgb")
 end
 
-testResponse()
+if charsPerWord == 5
+    testResponse()
+end
 
 """
     Matrix of precomputed responses, indexed by [answerIndex, guessIndex].
@@ -173,7 +189,7 @@ struct Partition
     nonEmptyBuckets::Vector{Int16}
 
     # Empty partition
-    Partition() = new(fill(nothing, 3^5), Int16[])
+    Partition() = new(fill(nothing, 3^charsPerWord), Int16[])
 end
 
 """
